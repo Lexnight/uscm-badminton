@@ -32,6 +32,23 @@ export function getDefaultState() {
   return deepClone(defaultState);
 }
 
+export function normalizeState(parsed) {
+  return {
+    ...getDefaultState(),
+    ...(parsed || {}),
+    settings: {
+      ...getDefaultState().settings,
+      ...((parsed && parsed.settings) || {})
+    },
+    bracket: {
+      ...getDefaultState().bracket,
+      ...((parsed && parsed.bracket) || {})
+    },
+    players: Array.isArray(parsed?.players) ? parsed.players : [],
+    groups: Array.isArray(parsed?.groups) ? parsed.groups : []
+  };
+}
+
 export function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -39,20 +56,7 @@ export function loadState() {
       return getDefaultState();
     }
     const parsed = JSON.parse(raw);
-    return {
-      ...getDefaultState(),
-      ...parsed,
-      settings: {
-        ...getDefaultState().settings,
-        ...(parsed.settings || {})
-      },
-      bracket: {
-        ...getDefaultState().bracket,
-        ...(parsed.bracket || {})
-      },
-      players: Array.isArray(parsed.players) ? parsed.players : [],
-      groups: Array.isArray(parsed.groups) ? parsed.groups : []
-    };
+    return normalizeState(parsed);
   } catch (error) {
     console.error('Erreur de chargement localStorage:', error);
     return getDefaultState();

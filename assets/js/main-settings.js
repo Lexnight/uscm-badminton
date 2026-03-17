@@ -1,4 +1,4 @@
-import { getState, setState, subscribe, resetAppState } from './modules/app.js';
+import { getState, setState, subscribe, resetAppState, importState } from './modules/app.js';
 import { addMinutesToTime, debounce } from './modules/utils.js';
 import { mountShell, escapeHtml, defaultPlayerColor, playerColor } from './modules/ui.js';
 import { buildGroups, suggestGroupCount, movePlayerBetweenGroups } from './modules/groups.js';
@@ -12,9 +12,62 @@ const content = mountShell({
 
 let draggedPlayerId = null;
 let openColorPopoverFor = null;
+let flashMessage = '';
+let flashType = 'success';
 
 function markBracketStale(bracket = {}) {
   return { ...bracket, stale: true };
+}
+
+function setFlash(message, type = 'success') {
+  flashMessage = message;
+  flashType = type;
+  render(getState());
+  window.clearTimeout(setFlash._timer);
+  setFlash._timer = window.setTimeout(() => {
+    flashMessage = '';
+    render(getState());
+  }, 2600);
+}
+
+function sanitizeFileName(value) {
+  return String(value || 'Tournoi')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9_-]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 60) || 'Tournoi';
+}
+
+function formatSaveStamp(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}_${hours}-${minutes}`;
+}
+
+function exportTournamentState(stateToExport) {
+  const snapshot = {
+    ...stateToExport,
+    updatedAt: new Date().toISOString(),
+    meta: {
+      source: 'Badminton Tournoi Pro',
+      exportedAt: new Date().toISOString()
+    }
+  };
+  const fileName = `${sanitizeFileName(snapshot.settings?.tournamentName || 'Tournoi')}_${formatSaveStamp(new Date())}.json`;
+  const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return fileName;
 }
 
 function createPlaceholderName(index) {
@@ -171,7 +224,7 @@ function render(state) {
             <h2>Paramètres du tournoi</h2>
             <p>Indiquez le nombre de participants / équipes, puis appliquez les paramètres. Les équipes provisoires sont créées automatiquement.</p>
           </div>
-          <span class="badge">Sauvegarde locale automatique</span>
+          <span class="badge">Sauvegarde locale + export JSON</span>
         </div>
 
         <form id="settings-form" class="form-grid">
@@ -214,10 +267,15 @@ function render(state) {
 
         <div class="actions">
           <button id="apply-settings" class="btn btn-primary">Appliquer les paramètres</button>
+          <button id="save-tournament" class="btn btn-secondary">Enregistrer</button>
+          <button id="export-json" class="btn btn-ghost">Exporter JSON</button>
+          <button id="import-json" class="btn btn-ghost">Importer JSON</button>
           <a href="poules.html" class="btn btn-secondary">Aller à la page Poules</a>
           <a href="ordre-de-jeu.html" class="btn btn-ghost">Ouvrir l'ordre de jeu</a>
           <button id="reset-app" class="btn btn-danger">Réinitialiser le tournoi</button>
+          <input id="import-json-input" type="file" accept="application/json,.json" hidden>
         </div>
+        ${flashMessage ? `<div class="save-feedback ${flashType}">${escapeHtml(flashMessage)}</div>` : ''}
 
         <div class="projection-panel">
           <div class="section-title projection-title">
@@ -292,6 +350,44 @@ function render(state) {
 function bindEvents() {
   document.getElementById('apply-settings')?.addEventListener('click', () => {
     setState(buildStateFromForm());
+    setFlash('Paramètres appliqués et sauvegardés en local.');
+  });
+
+  document.getElementById('save-tournament')?.addEventListener('click', () => {
+    setState(buildStateFromForm());
+    setFlash('Tournoi enregistré dans le navigateur.');
+  });
+
+  document.getElementById('export-json')?.addEventListener('click', () => {
+    const nextState = buildStateFromForm();
+    setState(nextState);
+    const fileName = exportTournamentState(nextState);
+    setFlash(`Export JSON créé : ${fileName}`);
+  });
+
+  document.getElementById('import-json')?.addEventListener('click', () => {
+    document.getElementById('import-json-input')?.click();
+  });
+
+  document.getElementById('import-json-input')?.addEventListener('change', async (event) => {
+    const input = event.currentTarget;
+    const file = input?.files?.[0];
+    if (!file) return;
+    try {
+      const content = await file.text();
+      const parsed = JSON.parse(content);
+      if (!parsed || typeof parsed !== 'object') {
+        throw new Error('Fichier JSON invalide.');
+      }
+      importState(parsed);
+      openColorPopoverFor = null;
+      setFlash(`Tournoi importé depuis ${file.name}`);
+    } catch (error) {
+      console.error(error);
+      setFlash('Import impossible : fichier JSON invalide ou incompatible.', 'error');
+    } finally {
+      if (input) input.value = '';
+    }
   });
 
   document.getElementById('reset-app')?.addEventListener('click', () => {

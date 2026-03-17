@@ -194,3 +194,11 @@ Le projet est prêt à étendre avec :
 - Sidebar réduite aux icônes
 - Nouvelle page `affichage.html` : clone public de l'ordre de jeu sans menu
 - Synchronisation automatique de l'écran public via localStorage
+
+
+## V10 sauvegarde
+- bouton Enregistrer
+- bouton Exporter JSON
+- bouton Importer JSON
+- nomenclature d'export : `Nomdutournoi_YYYY-MM-DD_HH-MM.json`
+- l'export crée un nouveau fichier à chaque fois

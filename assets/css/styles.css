@@ -2583,7 +2583,7 @@ input:focus, select:focus, textarea:focus{
   min-width:56px;
   height:56px;
   padding:0 !important;
-  display:flex !important;
+  display:grid !important;
   place-items:center !important;
 }
 .nav-link-icon-glyph{
@@ -2741,7 +2741,7 @@ input:focus, select:focus, textarea:focus{
 
 .nav-link-icon{
   margin: 0 auto !important;
-  display: flex !important;
+  display: grid !important;
   place-items: center !important;
 }
 
@@ -2937,4 +2937,26 @@ h3,
   .public-live-courts-grid{
     grid-template-columns: 1fr !important;
   }
+}
+
+
+/* ===== V10 save/import/export ===== */
+.save-feedback{
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.04);
+  color: #fff;
+  font-weight: 600;
+}
+.save-feedback.success{
+  border-color: rgba(70,214,160,.24);
+  background: rgba(70,214,160,.10);
+  color: #d8fff1;
+}
+.save-feedback.error{
+  border-color: rgba(255,107,107,.24);
+  background: rgba(255,107,107,.10);
+  color: #ffd8d8;
 }

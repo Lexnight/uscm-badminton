@@ -1,4 +1,4 @@
-import { loadState, saveState, resetState as clearStorage } from './storage.js';
+import { loadState, saveState, resetState as clearStorage, normalizeState } from './storage.js';
 
 let state = loadState();
 const listeners = new Set();
@@ -36,3 +36,10 @@ window.addEventListener('storage', (event) => {
     listeners.forEach((listener) => listener(state));
   }
 });
+
+
+export function importState(rawState) {
+  state = saveState(normalizeState(rawState));
+  listeners.forEach((listener) => listener(state));
+  return state;
+}
