@@ -1,6 +1,7 @@
-import { getState, setState, subscribe, resetAppState, importState } from './modules/app.js';
+import { getState, setState, subscribe, resetAppState } from './modules/app.js';
 import { addMinutesToTime, debounce } from './modules/utils.js';
 import { mountShell, escapeHtml, defaultPlayerColor, playerColor } from './modules/ui.js';
+import { bindSidebarPersistence } from './modules/save-controls.js';
 import { buildGroups, suggestGroupCount, movePlayerBetweenGroups } from './modules/groups.js';
 import { getTournamentDurationSummary, getQualifiedPlayers, getMatchOutcome } from './modules/calculations.js';
 
@@ -212,7 +213,7 @@ function render(state) {
   const progressPercent = (duration.groupMatches + duration.bracketMatches) ? Math.round((completedMatches / (duration.groupMatches + duration.bracketMatches)) * 100) : 0;
   const projectedEndTime = participantCount
     ? (completedMatches > 0
-      ? addMinutesToTime(new Date().toTimeString().slice(0, 5), remainingMatches * Number(state.settings.matchDuration || 20))
+      ? addMinutesToTime(new Date().toTimeString().slice(0, 5), Math.ceil(remainingMatches / Math.max(1, Number(state.settings.courtCount || 1))) * Number(state.settings.matchDuration || 20))
       : addMinutesToTime(state.settings.startTime, duration.totalMinutes))
     : '—';
 
@@ -224,7 +225,7 @@ function render(state) {
             <h2>Paramètres du tournoi</h2>
             <p>Indiquez le nombre de participants / équipes, puis appliquez les paramètres. Les équipes provisoires sont créées automatiquement.</p>
           </div>
-          <span class="badge">Sauvegarde locale + export JSON</span>
+          
         </div>
 
         <form id="settings-form" class="form-grid">
@@ -267,13 +268,7 @@ function render(state) {
 
         <div class="actions">
           <button id="apply-settings" class="btn btn-primary">Appliquer les paramètres</button>
-          <button id="save-tournament" class="btn btn-secondary">Enregistrer</button>
-          <button id="export-json" class="btn btn-ghost">Exporter JSON</button>
-          <button id="import-json" class="btn btn-ghost">Importer JSON</button>
-          <a href="poules.html" class="btn btn-secondary">Aller à la page Poules</a>
-          <a href="ordre-de-jeu.html" class="btn btn-ghost">Ouvrir l'ordre de jeu</a>
           <button id="reset-app" class="btn btn-danger">Réinitialiser le tournoi</button>
-          <input id="import-json-input" type="file" accept="application/json,.json" hidden>
         </div>
         ${flashMessage ? `<div class="save-feedback ${flashType}">${escapeHtml(flashMessage)}</div>` : ''}
 
@@ -309,6 +304,10 @@ function render(state) {
               <div class="label">Fin estimée</div>
               <div class="value">${completedMatches > 0 ? 'Maintenant' : (state.settings.startTime || '09:00').slice(0, 5)} → ${projectedEndTime}</div>
             </div>
+            <div class="kpi">
+              <div class="label">Terrains pris en compte</div>
+              <div class="value">${Math.max(1, Number(state.settings.courtCount || 1))}</div>
+            </div>
           </div>
           <div class="summary-list compact-summary">
             <div class="summary-item"><span>Poules générées</span><strong>${effectiveGroups.length || suggestedGroups}</strong></div>
@@ -336,58 +335,22 @@ function render(state) {
             <h2>Composition des poules</h2>
             <p>Renommez les équipes, ouvrez le sélecteur de couleur puis validez, et déplacez les cartes entre les poules pour réajuster la composition avant de passer à la page Poules.</p>
           </div>
-          <a href="poules.html" class="btn btn-ghost">Ouvrir les poules</a>
+
         </div>
         ${renderGroupsOverview(effectiveGroups, state.players)}
-        <div class="footer-note">Le renommage, les couleurs et le drag & drop se font ici. La page Poules reste dédiée à la saisie des scores et au classement.</div>
+        
       </article>
     </section>
     `;
 
   bindEvents();
+  bindSidebarPersistence();
 }
 
 function bindEvents() {
   document.getElementById('apply-settings')?.addEventListener('click', () => {
     setState(buildStateFromForm());
     setFlash('Paramètres appliqués et sauvegardés en local.');
-  });
-
-  document.getElementById('save-tournament')?.addEventListener('click', () => {
-    setState(buildStateFromForm());
-    setFlash('Tournoi enregistré dans le navigateur.');
-  });
-
-  document.getElementById('export-json')?.addEventListener('click', () => {
-    const nextState = buildStateFromForm();
-    setState(nextState);
-    const fileName = exportTournamentState(nextState);
-    setFlash(`Export JSON créé : ${fileName}`);
-  });
-
-  document.getElementById('import-json')?.addEventListener('click', () => {
-    document.getElementById('import-json-input')?.click();
-  });
-
-  document.getElementById('import-json-input')?.addEventListener('change', async (event) => {
-    const input = event.currentTarget;
-    const file = input?.files?.[0];
-    if (!file) return;
-    try {
-      const content = await file.text();
-      const parsed = JSON.parse(content);
-      if (!parsed || typeof parsed !== 'object') {
-        throw new Error('Fichier JSON invalide.');
-      }
-      importState(parsed);
-      openColorPopoverFor = null;
-      setFlash(`Tournoi importé depuis ${file.name}`);
-    } catch (error) {
-      console.error(error);
-      setFlash('Import impossible : fichier JSON invalide ou incompatible.', 'error');
-    } finally {
-      if (input) input.value = '';
-    }
   });
 
   document.getElementById('reset-app')?.addEventListener('click', () => {

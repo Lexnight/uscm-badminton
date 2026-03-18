@@ -6,13 +6,15 @@ function normalizeSetScore(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+
+
+
 function getSetCap(pointTarget = 21) {
-  return Math.max(1, Number(pointTarget || 21)) + 9;
+  return Number(pointTarget || 21);
 }
 
 export function validateBadmintonSet(rawSet = {}, pointTarget = 21) {
   const target = Math.max(1, Number(pointTarget || 21));
-  const cap = getSetCap(target);
   const a = normalizeSetScore(rawSet?.a);
   const b = normalizeSetScore(rawSet?.b);
 
@@ -24,44 +26,38 @@ export function validateBadmintonSet(rawSet = {}, pointTarget = 21) {
     return { complete: false, valid: true, status: 'incomplete', message: '' };
   }
 
+  if (a < 0 || b < 0) {
+    return { complete: true, valid: false, status: 'error', message: 'Un score ne peut pas être négatif.' };
+  }
+
   if (a === b) {
     return { complete: true, valid: false, status: 'error', message: 'Un set ne peut pas se terminer sur une égalité.' };
   }
 
   const higher = Math.max(a, b);
-  const lower = Math.min(a, b);
+  const diff = Math.abs(a - b);
 
-  if (higher > cap) {
-    return { complete: true, valid: false, status: 'error', message: `Le score maximum autorisé est ${cap}.` };
+  if (higher <= target) {
+    return { complete: true, valid: true, status: 'normal', message: '' };
   }
 
-  if (higher < target) {
-    return { complete: true, valid: false, status: 'error', message: `Le vainqueur doit atteindre au moins ${target} points.` };
+  if (diff === 2) {
+    return {
+      complete: true,
+      valid: true,
+      status: 'caution',
+      message: `Score prolongé valide au-delà de ${target} : mise en évidence orange.`
+    };
   }
 
-  if (higher === target) {
-    if (lower <= target - 2) {
-      return { complete: true, valid: true, status: 'normal', message: '' };
-    }
-    return { complete: true, valid: false, status: 'error', message: `À ${target}, il faut au moins 2 points d'écart.` };
-  }
-
-  if (higher < cap) {
-    if (lower < target - 1) {
-      return { complete: true, valid: false, status: 'error', message: `Au-delà de ${target}, le perdant doit avoir au moins ${target - 1} points.` };
-    }
-    if (higher - lower !== 2) {
-      return { complete: true, valid: false, status: 'error', message: `Au-delà de ${target}, il faut exactement 2 points d'écart.` };
-    }
-    return { complete: true, valid: true, status: 'caution', message: `Score prolongé au-delà de ${target} : vérifiez qu'il est correct.` };
-  }
-
-  if (lower < cap - 2) {
-    return { complete: true, valid: false, status: 'error', message: `À ${cap}, le perdant doit avoir ${cap - 2} ou ${cap - 1}.` };
-  }
-
-  return { complete: true, valid: true, status: 'caution', message: `Score au plafond de ${cap} points : vérifiez qu'il est correct.` };
+  return {
+    complete: true,
+    valid: false,
+    status: 'error',
+    message: `Au-delà de ${target}, il faut exactement 2 points d'écart.`
+  };
 }
+
 
 export function sanitizeSets(rawSets = []) {
   return (rawSets || [])
@@ -346,13 +342,17 @@ export function getTournamentDurationSummary(state) {
   const normalizedQualifierCount = Math.max(2, qualifierCount);
   const bracketMatches = Math.max(0, Math.pow(2, Math.ceil(Math.log2(normalizedQualifierCount))) - 1);
   const totalMatches = groupMatches + bracketMatches;
-  const totalMinutes = totalMatches * Number(state.settings.matchDuration || 20);
+  const matchDuration = Number(state.settings.matchDuration || 20);
+  const courtCount = Math.max(1, Number(state.settings.courtCount || 1));
+  const totalMinutes = Math.ceil(totalMatches / courtCount) * matchDuration;
 
   return {
     groupMatches,
     bracketMatches,
     totalMatches,
-    totalMinutes
+    totalMinutes,
+    courtCount,
+    matchDuration
   };
 }
 

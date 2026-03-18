@@ -1,6 +1,7 @@
 
 import { subscribe } from './modules/app.js';
 import { mountShell } from './modules/ui.js';
+import { bindSidebarPersistence } from './modules/save-controls.js';
 import { renderOrderDashboard } from './modules/display-order.js';
 
 const content = mountShell({
@@ -11,6 +12,7 @@ const content = mountShell({
 
 function render(state) {
   content.innerHTML = renderOrderDashboard(state, { publicView: false });
+  bindSidebarPersistence();
 }
 
 subscribe(render);

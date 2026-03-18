@@ -1,6 +1,7 @@
 import { getState, setState, subscribe, resetAppState } from './modules/app.js';
 import { addMinutesToTime, pairKey } from './modules/utils.js';
 import { mountShell, escapeHtml, playerName, playerColor } from './modules/ui.js';
+import { bindSidebarPersistence } from './modules/save-controls.js';
 import { buildGroups, rebalanceExistingGroups, updateGroupMatchScore, getGroupImbalance, syncDerivedGroupCount } from './modules/groups.js';
 import { calculateGroupStandings, getTournamentDurationSummary, getQualifiedPlayers, getMatchOutcome, shouldDisableThirdSet, validateBadmintonSet } from './modules/calculations.js';
 
@@ -247,7 +248,7 @@ function render(state) {
             <h2>Feuilles de poules</h2>
             <p>Affichage par onglets : une seule poule visible à la fois, pour une lecture plus confortable et une saisie plus rapide.</p>
           </div>
-          <span class="badge">${groups.length} poule(s)</span>
+          
         </div>
         <div class="kpis">
           <div class="kpi">
@@ -267,7 +268,7 @@ function render(state) {
             <div class="value">${(activeState.settings.startTime || '09:00').slice(0, 5)} → ${addMinutesToTime(activeState.settings.startTime, duration.totalMinutes)}</div>
           </div>
         </div>
-        <div class="footer-note">${qualified.length} qualifié(s) projeté(s) pour le tableau final.</div>
+        
         <div class="progress-card tight">
           <div class="progress-head">
             <strong>Avancement des poules</strong>
@@ -301,9 +302,8 @@ function render(state) {
         `}
         <div class="actions">
           <button id="optimize-groups" class="btn btn-primary">Optimiser automatiquement</button>
-          <a href="index.html" class="btn btn-ghost">Retour aux paramètres</a>
         </div>
-        <div class="footer-note">Un score incohérent s'affiche en rouge. Un score prolongé au-delà de ${Number(activeState.settings.setPoints || 21)} s'affiche en orange pour vérification.</div>
+        <div class="footer-note score-legend-note"><strong>Contrôle saisie :</strong> rouge = score invalide · orange = score prolongé à vérifier.</div>
       </article>
     </section>
 
@@ -321,9 +321,9 @@ function render(state) {
             <div class="section-title">
               <div>
                 <h3>${escapeHtml(activeGroup.name)}</h3>
-                <p class="muted">${activeGroup.playerIds.length} équipe(s) · ${activeGroup.matches.length} match(s)</p>
+                
               </div>
-              <span class="badge">Saisie directe</span>
+              
             </div>
             ${renderGroupMatrix(activeGroup, activeState)}
           </article>
@@ -459,6 +459,7 @@ function bindEvents() {
     activeGroupId = null;
     resetAppState();
   });
+  bindSidebarPersistence();
 }
 
 subscribe(render);

@@ -1,5 +1,6 @@
 import { subscribe } from './modules/app.js';
 import { mountShell, escapeHtml, renderPlayerBadge } from './modules/ui.js';
+import { bindSidebarPersistence } from './modules/save-controls.js';
 import { calculateGeneralStats, getTournamentDurationSummary, getChampion, calculateAllGroupStandings } from './modules/calculations.js';
 import { addMinutesToTime, sortNames } from './modules/utils.js';
 
@@ -190,17 +191,18 @@ function render(state) {
             <div class="match-card">
               <div class="row-between">
                 <strong>${escapeHtml(group.groupName)}</strong>
-                <span class="badge">Top 3</span>
+                
               </div>
               <ol>
                 ${group.standings.slice(0, 3).map((row) => `<li>${escapeHtml(row.name)} · ${row.rankingPoints} pts classement · ${row.avgPointsPerMatch.toFixed(2)} pts/match</li>`).join('') || '<li class="muted">Pas encore de classement.</li>'}
               </ol>
             </div>
-          `).join('') : '<p class="muted">Aucune poule générée.</p>'}
+          `).join('') : ''}
         </div>
       </article>
     </section>
   `;
+  bindSidebarPersistence();
 }
 
 subscribe(render);

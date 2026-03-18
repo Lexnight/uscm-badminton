@@ -10,7 +10,7 @@ function renderMatchCard(state, entry, courtLabel, compact = false) {
       <article class="match-card-enhanced live-court-card ${compact ? 'compact' : ''}">
         <div class="court-chip">${escapeHtml(courtLabel)}</div>
         <h3>En attente</h3>
-        <p class="muted">Aucun match assigné pour l'instant.</p>
+        
       </article>
     `;
   }
@@ -25,7 +25,7 @@ function renderMatchCard(state, entry, courtLabel, compact = false) {
         <div class="versus">vs</div>
         <div>${bName}</div>
       </div>
-      <div class="footer-note">Match #${entry.absoluteIndex}</div>
+      
     </article>
   `;
 }
@@ -43,9 +43,9 @@ export function renderOrderDashboard(state, options = {}) {
           <div class="section-title">
             <div>
               <h2>${publicView ? 'Matchs en cours' : 'Pilotage des terrains'}</h2>
-              <p>${publicView ? "Affichage en direct pour les compétiteurs." : "Les matchs en cours sont affectés automatiquement selon le nombre de terrains. Dès qu'un match est terminé, le suivant remonte tout seul."}</p>
+              <p>${publicView ? "Affichage en direct pour les compétiteurs." : "Les matchs en cours sont affectés automatiquement selon le nombre de terrains. Dès qu'un match est terminé, le suivant remonte tout seul, avec une logique qui évite autant que possible qu'une même équipe rejoue immédiatement."}</p>
             </div>
-            <span class="badge">${live.courtCount} terrain(x)</span>
+            
           </div>
 
           <div class="kpis compact-kpis">
@@ -143,7 +143,7 @@ export function renderOrderDashboard(state, options = {}) {
             <h2>Classement général</h2>
             <p>Top 8 mis à jour automatiquement.</p>
           </div>
-          <span class="badge">1 / 8</span>
+          
         </div>
         <div class="ranking-stack">
           ${live.ranking.length ? live.ranking.map((row) => `

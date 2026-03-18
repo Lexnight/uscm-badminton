@@ -51,11 +51,12 @@ export function renderPlayerBadge(players, playerId, options = {}) {
 
 export function renderNav(activePage) {
   const links = [
-    { href: 'index.html', label: 'Paramètres', short: '⚙️', key: 'parametres' },
-    { href: 'poules.html', label: 'Poules', short: '🏸', key: 'poules' },
-    { href: 'tableau.html', label: 'Tableau', short: '🏆', key: 'tableau' },
-    { href: 'ordre-de-jeu.html', label: 'Ordre de jeu', short: '📋', key: 'ordre' },
-    { href: 'statistiques.html', label: 'Statistiques', short: '📈', key: 'statistiques' }
+    { href: 'index.html', label: 'Paramètres', icon: 'fa-solid fa-sliders', key: 'parametres' },
+    { href: 'poules.html', label: 'Poules', icon: 'fa-solid fa-table-cells-large', key: 'poules' },
+    { href: 'tableau.html', label: 'Tableau', icon: 'fa-solid fa-trophy', key: 'tableau' },
+    { href: 'ordre-de-jeu.html', label: 'Ordre de jeu', icon: 'fa-solid fa-list-check', key: 'ordre' },
+    { href: 'guide.html', label: 'Guide', icon: 'fa-solid fa-circle-info', key: 'guide' },
+    { href: 'statistiques.html', label: 'Statistiques', icon: 'fa-solid fa-chart-simple', key: 'statistiques' }
   ];
 
   return `
@@ -63,9 +64,23 @@ export function renderNav(activePage) {
       <div class="nav-inner vertical">
         ${links.map((link) => `
           <a class="nav-link nav-link-icon ${activePage === link.key ? 'active' : ''}" href="${link.href}" title="${link.label}" aria-label="${link.label}">
-            <span class="nav-link-icon-glyph" aria-hidden="true">${link.short}</span>
+            <i class="${link.icon}" aria-hidden="true"></i>
           </a>
         `).join('')}
+      </div>
+
+      <div class="sidebar-tools" aria-label="Sauvegarde">
+        <button type="button" class="sidebar-action-btn sidebar-action-save" id="sidebar-save" title="Enregistrer" aria-label="Enregistrer">
+          <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="sidebar-action-btn" id="sidebar-export" title="Exporter JSON" aria-label="Exporter JSON">
+          <i class="fa-solid fa-file-arrow-down" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="sidebar-action-btn" id="sidebar-import" title="Importer JSON" aria-label="Importer JSON">
+          <i class="fa-solid fa-file-arrow-up" aria-hidden="true"></i>
+        </button>
+        <input id="sidebar-import-input" type="file" accept="application/json,.json" hidden>
+        <div id="sidebar-save-status" class="sidebar-save-status" aria-live="polite"></div>
       </div>
     </nav>
   `;
@@ -76,21 +91,21 @@ export function mountShell({ activePage, title, subtitle }) {
   shell.innerHTML = `
     <div class="app-shell app-shell-sidebar fade-in">
       <aside class="sidebar">
-        <div class="brand brand-vertical">
-          <img class="brand-logo" src="assets/img/logo-uscm.png" alt="Logo USCM Montereau">
-          <div class="brand-copy">
-            <span class="brand-kicker">Tournoi de badminton</span>
-            <strong>${escapeHtml(title)}</strong>
-            <p>${escapeHtml(subtitle)}</p>
+        <div class="sidebar-top">
+          <div class="brand brand-vertical">
+            <img class="brand-logo" src="assets/img/logo-uscm.png" alt="Logo USCM Montereau">
           </div>
+          ${renderNav(activePage)}
         </div>
-        ${renderNav(activePage)}
       </aside>
       <div class="main-layout">
         <header class="topbar topbar-page">
-          <div>
-            <h1 class="page-title">${escapeHtml(title)}</h1>
-            <p class="page-subtitle">${escapeHtml(subtitle)}</p>
+          <div class="page-heading-panel">
+            <div>
+              <div class="page-kicker">USCM · Tournament UI</div>
+              <h1 class="page-title">${escapeHtml(title)}</h1>
+              <p class="page-subtitle">${escapeHtml(subtitle)}</p>
+            </div>
           </div>
         </header>
         <main id="page-content"></main>

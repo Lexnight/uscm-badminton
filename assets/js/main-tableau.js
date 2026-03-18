@@ -1,6 +1,7 @@
 import { getState, setState, subscribe } from './modules/app.js';
 import { debounce, addMinutesToTime } from './modules/utils.js';
 import { mountShell, escapeHtml, playerColor, playerName, renderPlayerBadge } from './modules/ui.js';
+import { bindSidebarPersistence } from './modules/save-controls.js';
 import { generateBracket, updateBracketMatchScore, getBracketCompletion } from './modules/bracket.js';
 import { getQualifiedPlayers, getTournamentDurationSummary, getChampion, shouldDisableThirdSet, validateBadmintonSet } from './modules/calculations.js';
 
@@ -113,7 +114,7 @@ function renderMatchCard(match, round, state) {
   return `
     <div class="match-card match-card-enhanced" data-round-id="${round.id}" data-match-id="${match.id}">
       <div class="match-topline">
-        <span class="badge">${escapeHtml(match.label || 'Match')}</span>
+        
         <span class="match-status ${match.finished ? '' : 'pending'}">${match.autoAdvanced ? 'Bye' : match.finished ? 'Terminé' : 'En attente'}</span>
       </div>
 
@@ -155,7 +156,7 @@ function render(state) {
             <h2>Configuration du tableau</h2>
             <p>Le tableau se base sur le classement actuel de chaque poule.</p>
           </div>
-          <span class="badge">${qualified.length} qualifié(s)</span>
+          
         </div>
         <div class="form-grid">
           <div class="field">
@@ -235,7 +236,7 @@ function render(state) {
       <div class="pill-row">
         ${qualified.length ? qualified.map((entry) => `
           <span class="badge badge-player"><span class="player-dot tiny" style="--player-color:${playerColor(state.players, entry.playerId)};"></span>${escapeHtml(entry.playerName)} · ${escapeHtml(entry.groupName)} · ${entry.rank}${entry.rank === 1 ? 'er' : 'e'}</span>
-        `).join('') : '<p class="muted">Aucun qualifié pour le moment. Complétez vos poules puis générez le tableau.</p>'}
+        `).join('') : ''}
       </div>
     </section>
 
@@ -245,16 +246,9 @@ function render(state) {
           <h2>Tableau par onglets</h2>
           <p>Chaque tour du tableau s'affiche dans son propre onglet pour une lecture plus claire.</p>
         </div>
-        ${activeRound ? `<span class="badge">${escapeHtml(activeRound.name)}</span>` : ''}
+        ${activeRound ? `` : ''}
       </div>
       ${rounds.length ? `
-        <div class="bracket-legend-wrap">
-          <div>
-            <h3 class="subsection-title">Repères visuels des équipes</h3>
-            <p class="muted">Retrouvez ici toutes les puces couleur pour repérer rapidement les équipes dans les tours du tableau.</p>
-          </div>
-          ${renderBracketLegend(bracketLegendEntries)}
-        </div>
         ${renderRoundTabs(rounds, currentRoundId)}
         <div class="round-tab-panel" style="margin-top:16px;">
           ${activeRound ? `
@@ -264,7 +258,7 @@ function render(state) {
             </div>
           ` : ''}
         </div>
-      ` : '<p class="muted">Aucun tableau généré pour le moment.</p>'}
+      ` : ''}
     </section>
   `;
 
@@ -384,6 +378,7 @@ function bindEvents() {
       });
     });
   });
+  bindSidebarPersistence();
 }
 
 subscribe(render);

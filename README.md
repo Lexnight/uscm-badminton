@@ -202,3 +202,88 @@ Le projet est prêt à étendre avec :
 - bouton Importer JSON
 - nomenclature d'export : `Nomdutournoi_YYYY-MM-DD_HH-MM.json`
 - l'export crée un nouveau fichier à chaque fois
+
+
+## V11 design inspiré
+- redesign inspiré des références fournies : dark neumorphism / glow / dashboard premium
+- sidebar verticale pleine hauteur sans arrondis
+- navigation et actions avec Font Awesome
+- sauvegarde / export / import dans la sidebar
+- palette noir / anthracite / orange / blanc conservée
+
+
+## V13 régie connectée
+- nouvelle page `regie.html`
+- connectée à l'état réel du tournoi
+- nombre de terrains dynamique depuis les paramètres
+- matchs en cours + 4 prochains matchs
+- classement top 8 et ordre complet
+- mise à jour automatique quand les scores changent
+\n\n## V14 anti-enchaînement\n- l'ordre de jeu essaie désormais d'éviter qu'une même équipe rejoue immédiatement\n- la logique conserve l'ordre initial autant que possible\n- si aucune alternative n'existe, le système garde le prochain match disponible\n
+
+## V15 guide & nettoyage
+- la page Régie est retirée du menu principal
+- nouvelle page `guide.html` avec explications, astuces et rappel des fonctionnalités du projet
+- suppression des raccourcis redondants dans les pages, la sidebar restant présente en permanence
+
+
+## V16 guide documentation
+- page Guide refaite en petites cartes filtrables
+- mise en page type centre d’aide / documentation produit
+- menu latéral du guide pour trier les contenus
+- règle CSS `.nav-link` ajustée selon la nouvelle spécification
+
+
+## V18 correction scores
+- correction visuelle : les champs de score restent neutres par défaut
+- rouge vif uniquement en cas de score invalide
+- orange vif uniquement en cas de score prolongé à vérifier
+- ajout d'exemples de règles de score dans le guide (21/20 invalide, 23/10 invalide, 25/23 valide)
+
+
+## V19 règles badminton
+- correction de la validation des sets selon les règles précisées
+- 21/10 et 21/19 sont valides
+- 21/20 est invalide
+- les scores prolongés sont valides seulement si le set n'aurait pas déjà dû s'arrêter plus tôt
+- format 15 points : plafond à 20
+
+
+## V20 règles simplifiées
+- jusqu'à 21 points (ou 15 selon le format), aucun rouge
+- au-delà de la valeur cible, exactement 2 points d'écart requis
+- 21/18 et 21/10 restent valides
+- 23/20 et 25/22 deviennent invalides
+
+
+## V21 marquage orange / rouge
+- orange dès qu'un score dépasse la valeur cible tout en restant valide
+- rouge uniquement si le score est incohérent au-delà de la valeur cible
+- jusqu'à 21 points (ou 15), aucun marquage spécial
+
+
+## V22 fix guide
+- correction du JS de la page Guide
+- bloc GUIDE_SECTIONS réécrit proprement
+- ajout d'une carte explicite pour le format 15 points
+
+
+## V23 estimation horaire
+- l'estimation de fin du tournoi prend désormais en compte le nombre de terrains
+- calcul simplifié : matchs répartis en parallèle sur les terrains disponibles
+- l'heure de fin projetée se met à jour avec les terrains restants et les matchs restants
+
+
+## V24 régie retravaillée
+- page régie sans menu
+- suppression du page_heading_panel sur la régie
+- classement déplacé tout en haut et sur toute la hauteur avec scroll interne
+- carte hero de régie compactée
+- priorité visuelle donnée aux terrains et à l'organisation des matchs
+
+
+## V25 régie classement complet
+- classement général complet de tous les participants/équipes dans la régie
+- stack du ranking compacté
+- KPI réduits et alignés sur une même ligne autant que possible
+- avancement global conservé sur la même ligne via KPI + barre compacte
