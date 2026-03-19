@@ -287,3 +287,26 @@ Le projet est prêt à étendre avec :
 - stack du ranking compacté
 - KPI réduits et alignés sur une même ligne autant que possible
 - avancement global conservé sur la même ligne via KPI + barre compacte
+
+
+## V26 classement & temps
+- le classement général place désormais en tête les joueurs du tableau final : 1er, 2e, puis autres qualifiés du tableau avant les non-qualifiés
+- à l'intérieur des ex aequo, tri par points de classement puis points marqués
+- l'estimation de fin du tournoi se met à jour avec les matchs réellement terminés et les terrains disponibles
+
+
+## V28 guide
+- ajout des règles de score simplifiées dans le guide
+- exemples valides et invalides ajoutés
+
+
+## V29 filtres classement
+- ajout d'un filtre principal sur le classement général
+- ajout d'un tri secondaire : points de classement, points marqués, victoires, différence de sets
+- filtres disponibles : tous, tableau, poules uniquement, par poule
+
+
+## V31 custom selects & ETA
+- remplacement visuel des menus natifs par des faux selects custom
+- meilleur contraste et meilleure lisibilité des options
+- l'heure de fin estimée tient explicitement compte de l'heure machine dès que le tournoi a commencé ou que l'heure de départ théorique est dépassée

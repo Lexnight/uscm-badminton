@@ -2,8 +2,9 @@ import { getState, setState, subscribe, resetAppState } from './modules/app.js';
 import { addMinutesToTime, debounce } from './modules/utils.js';
 import { mountShell, escapeHtml, defaultPlayerColor, playerColor } from './modules/ui.js';
 import { bindSidebarPersistence } from './modules/save-controls.js';
+import { bindCustomSelects } from './modules/custom-selects.js';
 import { buildGroups, suggestGroupCount, movePlayerBetweenGroups } from './modules/groups.js';
-import { getTournamentDurationSummary, getQualifiedPlayers, getMatchOutcome } from './modules/calculations.js';
+import { getTournamentTimingState, getQualifiedPlayers } from './modules/calculations.js';
 
 const content = mountShell({
   activePage: 'parametres',
@@ -204,18 +205,12 @@ function render(state) {
   }
 
   const { participantCount, suggestedGroups, effectiveGroups } = getEffectiveGroups(state);
-  const duration = getTournamentDurationSummary({ ...state, groups: effectiveGroups });
+  const duration = getTournamentTimingState({ ...state, groups: effectiveGroups });
   const qualified = getQualifiedPlayers({ ...state, groups: effectiveGroups }, state.settings.qualifierMode);
-  const completedGroupMatches = (effectiveGroups || []).reduce((total, group) => total + (group.matches || []).filter((match) => getMatchOutcome(match).finished).length, 0);
-  const completedBracketMatches = (state.bracket?.rounds || []).reduce((total, round) => total + (round.matches || []).filter((match) => getMatchOutcome(match).finished).length, 0);
-  const completedMatches = completedGroupMatches + completedBracketMatches;
-  const remainingMatches = Math.max(0, (duration.groupMatches + duration.bracketMatches) - completedMatches);
-  const progressPercent = (duration.groupMatches + duration.bracketMatches) ? Math.round((completedMatches / (duration.groupMatches + duration.bracketMatches)) * 100) : 0;
-  const projectedEndTime = participantCount
-    ? (completedMatches > 0
-      ? addMinutesToTime(new Date().toTimeString().slice(0, 5), Math.ceil(remainingMatches / Math.max(1, Number(state.settings.courtCount || 1))) * Number(state.settings.matchDuration || 20))
-      : addMinutesToTime(state.settings.startTime, duration.totalMinutes))
-    : '—';
+  const completedMatches = duration.completedMatches;
+  const remainingMatches = duration.remainingMatches;
+  const progressPercent = duration.totalMatches ? Math.round((completedMatches / duration.totalMatches) * 100) : 0;
+  const projectedEndTime = participantCount ? duration.projectedEndTime : '—';
 
   content.innerHTML = `
     <section class="hero-grid settings-layout">
@@ -344,6 +339,7 @@ function render(state) {
     `;
 
   bindEvents();
+  bindCustomSelects();
   bindSidebarPersistence();
 }
 

@@ -1,7 +1,7 @@
 
 import { escapeHtml, renderPlayerBadge, playerColor } from './ui.js';
 import { addMinutesToTime } from './utils.js';
-import { getTournamentDurationSummary } from './calculations.js';
+import { getTournamentTimingState } from './calculations.js';
 import { getLiveOrderState } from './schedule.js';
 
 function renderCourtCard(state, entry, index) {
@@ -70,8 +70,8 @@ function renderUpcomingCard(state, entry, idx) {
 export function renderRegieDashboard(state, options = {}) {
   const { standalone = false } = options;
   const live = getLiveOrderState(state);
-  const duration = getTournamentDurationSummary(state);
-  const endTime = addMinutesToTime(state.settings.startTime, duration.totalMinutes);
+  const duration = getTournamentTimingState(state);
+  const endTime = duration.projectedEndTime;
 
   const body = `
     <section class="regie-grid regie-grid-priority">

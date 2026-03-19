@@ -11,6 +11,7 @@ const content = mountShell({
 
 
 
+
 const GUIDE_SECTIONS = [
   {
     category: 'overview',
@@ -70,52 +71,45 @@ const GUIDE_SECTIONS = [
   },
   {
     category: 'rules',
-    icon: 'fa-solid fa-medal',
-    title: 'Règle simple de score',
-    text: 'Jusqu’à 21 points, ou jusqu’à 15 si ce format est choisi, aucun marquage spécial. Au-delà de la valeur cible, un score valide devient orange et un score incohérent devient rouge.',
+    icon: 'fa-solid fa-scale-balanced',
+    title: 'Règle de score simplifiée',
+    text: 'Jusqu’à la valeur cible du set, il n’y a pas de marquage spécial. Au-delà de cette valeur, un score valide passe en orange et un score incohérent passe en rouge.',
     badge: 'Règle'
   },
   {
     category: 'rules',
-    icon: 'fa-solid fa-check',
-    title: 'Exemple valide : 21 / 18',
-    text: '21/18 est valide. Tant que le score gagnant ne dépasse pas 21, il n’y a pas de mise en rouge.',
-    badge: 'Score'
-  },
-  {
-    category: 'rules',
-    icon: 'fa-solid fa-check',
-    title: 'Exemple valide : 21 / 10',
-    text: '21/10 est valide. Tant que le score gagnant ne dépasse pas 21, il n’y a pas de contrôle visuel rouge.',
-    badge: 'Score'
-  },
-  {
-    category: 'rules',
-    icon: 'fa-solid fa-check',
-    title: 'Exemple valide : 23 / 21',
-    text: '23/21 est valide : le score dépasse 21 et il y a exactement 2 points d’écart. Il doit apparaître en orange.',
-    badge: 'Score'
-  },
-  {
-    category: 'rules',
-    icon: 'fa-solid fa-ban',
-    title: 'Exemple invalide : 23 / 20',
-    text: '23/20 est invalide : au-delà de 21 points, il faut exactement 2 points d’écart. Il doit apparaître en rouge.',
-    badge: 'Score'
-  },
-  {
-    category: 'rules',
-    icon: 'fa-solid fa-ban',
-    title: 'Exemple invalide : 25 / 22',
-    text: '25/22 est invalide : au-delà de 21 points, il faut exactement 2 points d’écart. Il doit apparaître en rouge.',
-    badge: 'Score'
+    icon: 'fa-solid fa-bullseye',
+    title: 'Format 21 points',
+    text: 'Tant que le score gagnant est à 21 ou moins, il n’y a pas de rouge. Dès qu’on dépasse 21, il faut exactement 2 points d’écart.',
+    badge: '21 points'
   },
   {
     category: 'rules',
     icon: 'fa-solid fa-flag-checkered',
-    title: 'Cas du format 15 points',
-    text: 'Le même principe s’applique avec 15 comme valeur cible : jusqu’à 15, pas de marquage spécial ; au-delà de 15, orange si valide, rouge si incohérent.',
-    badge: 'Format'
+    title: 'Format 15 points',
+    text: 'Le même principe s’applique avec 15 comme valeur cible : jusqu’à 15, aucun marquage spécial ; au-delà de 15, orange si valide et rouge si incohérent.',
+    badge: '15 points'
+  },
+  {
+    category: 'rules',
+    icon: 'fa-solid fa-check',
+    title: 'Exemples valides',
+    text: '21/18 et 21/10 sont valides. 23/21 est aussi valide : il dépasse 21 avec exactement 2 points d’écart, donc il doit apparaître en orange.',
+    badge: 'Valides'
+  },
+  {
+    category: 'rules',
+    icon: 'fa-solid fa-ban',
+    title: 'Exemples invalides',
+    text: '23/20 et 25/22 sont invalides : au-delà de 21 points, il faut exactement 2 points d’écart. Ils doivent apparaître en rouge.',
+    badge: 'Invalides'
+  },
+  {
+    category: 'rules',
+    icon: 'fa-solid fa-circle-exclamation',
+    title: 'Important',
+    text: 'Les exemples servent à illustrer la règle. La logique n’est pas figée sur quelques scores précis : elle applique la règle générale selon la valeur cible du set.',
+    badge: 'Logique'
   },
   {
     category: 'display',
@@ -132,6 +126,7 @@ const GUIDE_SECTIONS = [
     badge: 'Écran'
   }
 ];
+
 
 
 

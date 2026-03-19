@@ -4207,3 +4207,103 @@ h3{
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 }
+
+
+/* ===== V29 ranking filters ===== */
+.ranking-filter-bar{
+  display:grid;
+  grid-template-columns:260px 260px;
+  gap:12px;
+  margin:12px 0 16px;
+}
+@media (max-width: 800px){
+  .ranking-filter-bar{
+    grid-template-columns:1fr;
+  }
+}
+
+
+/* ===== V31 custom selects ===== */
+.custom-select {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select-trigger {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: linear-gradient(180deg,#171a1f,#121419);
+  border: 1px solid #4a4f58;
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.03);
+}
+
+.custom-select-trigger:hover {
+  border-color: #ff8c00;
+}
+
+.custom-select.is-open .custom-select-trigger {
+  border-color: #ff8c00;
+  box-shadow: 0 0 0 3px rgba(255,140,0,.16), inset 0 1px 0 rgba(255,255,255,.03);
+}
+
+.custom-select-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.custom-select-menu {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  display: none;
+  padding: 8px;
+  border-radius: 16px;
+  background: #171a1f;
+  border: 1px solid #4a4f58;
+  box-shadow: 0 20px 36px rgba(0,0,0,.42);
+  max-height: 260px;
+  overflow: auto;
+}
+
+.custom-select.is-open .custom-select-menu {
+  display: grid;
+  gap: 6px;
+}
+
+.custom-select-option {
+  width: 100%;
+  min-height: 40px;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.04);
+  color: #ffffff;
+}
+
+.custom-select-option:hover,
+.custom-select-option:focus {
+  background: #ff9a00;
+  color: #111111;
+}
+
+.custom-select-option.is-selected {
+  background: rgba(255,140,0,.18);
+  border-color: rgba(255,140,0,.32);
+}
+
+.custom-select-option.is-selected:hover,
+.custom-select-option.is-selected:focus {
+  background: #ff9a00;
+  color: #111111;
+}

@@ -2,6 +2,7 @@ import { getState, setState, subscribe } from './modules/app.js';
 import { debounce, addMinutesToTime } from './modules/utils.js';
 import { mountShell, escapeHtml, playerColor, playerName, renderPlayerBadge } from './modules/ui.js';
 import { bindSidebarPersistence } from './modules/save-controls.js';
+import { bindCustomSelects } from './modules/custom-selects.js';
 import { generateBracket, updateBracketMatchScore, getBracketCompletion } from './modules/bracket.js';
 import { getQualifiedPlayers, getTournamentDurationSummary, getChampion, shouldDisableThirdSet, validateBadmintonSet } from './modules/calculations.js';
 
@@ -378,6 +379,7 @@ function bindEvents() {
       });
     });
   });
+  bindCustomSelects();
   bindSidebarPersistence();
 }
 

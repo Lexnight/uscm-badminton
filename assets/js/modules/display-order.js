@@ -1,7 +1,7 @@
 
 import { escapeHtml, renderPlayerBadge, playerColor } from './ui.js';
 import { addMinutesToTime } from './utils.js';
-import { getTournamentDurationSummary } from './calculations.js';
+import { getTournamentTimingState } from './calculations.js';
 import { getLiveOrderState } from './schedule.js';
 
 function renderMatchCard(state, entry, courtLabel, compact = false) {
@@ -33,8 +33,8 @@ function renderMatchCard(state, entry, courtLabel, compact = false) {
 export function renderOrderDashboard(state, options = {}) {
   const { publicView = false } = options;
   const live = getLiveOrderState(state);
-  const duration = getTournamentDurationSummary(state);
-  const endTime = addMinutesToTime(state.settings.startTime, duration.totalMinutes);
+  const duration = getTournamentTimingState(state);
+  const endTime = duration.projectedEndTime;
 
   return `
     <section class="hero-grid order-layout ${publicView ? 'public-order-layout' : ''}">

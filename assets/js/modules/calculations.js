@@ -1,4 +1,4 @@
-import { byId, pairKey, sortNames } from './utils.js';
+import { byId, pairKey, sortNames, addMinutesToTime } from './utils.js';
 
 function normalizeSetScore(value) {
   if (value === '' || value === null || value === undefined) return null;
@@ -229,10 +229,17 @@ export function calculateAllGroupStandings(state) {
   }));
 }
 
+
 export function calculateGeneralStats(state) {
   const baseRows = state.players
     .map(createRankingRow)
-    .map((row) => ({ ...row, bracketWins: 0, bracketLosses: 0 }));
+    .map((row) => ({
+      ...row,
+      bracketWins: 0,
+      bracketLosses: 0,
+      bracketPlacementBucket: 4,
+      bracketPlacementLabel: ''
+    }));
   const map = new Map(baseRows.map((row) => [row.playerId, row]));
 
   const applyMatch = (match, isBracket = false) => {
@@ -294,8 +301,47 @@ export function calculateGeneralStats(state) {
     row.avgPointsPerMatch = row.played ? Number((row.pointsWon / row.played).toFixed(2)) : 0;
   });
 
+  const bracketRounds = state.bracket?.rounds || [];
+  const bracketPlayerIds = new Set();
+  for (const round of bracketRounds) {
+    for (const match of round.matches || []) {
+      if (match.player1Id) bracketPlayerIds.add(match.player1Id);
+      if (match.player2Id) bracketPlayerIds.add(match.player2Id);
+    }
+  }
+
+  // Default: players not in the bracket come after the bracket participants.
+  baseRows.forEach((row) => {
+    if (bracketPlayerIds.has(row.playerId)) {
+      row.bracketPlacementBucket = 3;
+      row.bracketPlacementLabel = 'Tableau';
+    }
+  });
+
+  const finalRound = bracketRounds[bracketRounds.length - 1];
+  const finalMatch = finalRound?.matches?.[0];
+  if (finalMatch?.winnerId) {
+    const championId = finalMatch.winnerId;
+    const finalistId = finalMatch.player1Id === championId ? finalMatch.player2Id : finalMatch.player1Id;
+
+    const champion = map.get(championId);
+    const finalist = map.get(finalistId);
+    if (champion) {
+      champion.bracketPlacementBucket = 1;
+      champion.bracketPlacementLabel = '1er tableau';
+    }
+    if (finalist) {
+      finalist.bracketPlacementBucket = 2;
+      finalist.bracketPlacementLabel = '2e tableau';
+    }
+  }
+
   baseRows.sort((left, right) => {
+    if (left.bracketPlacementBucket !== right.bracketPlacementBucket) {
+      return left.bracketPlacementBucket - right.bracketPlacementBucket;
+    }
     if (right.rankingPoints !== left.rankingPoints) return right.rankingPoints - left.rankingPoints;
+    if (right.pointsWon !== left.pointsWon) return right.pointsWon - left.pointsWon;
     if (right.avgPointsPerMatch !== left.avgPointsPerMatch) return right.avgPointsPerMatch - left.avgPointsPerMatch;
     if (right.pointDiff !== left.pointDiff) return right.pointDiff - left.pointDiff;
     if (right.setDiff !== left.setDiff) return right.setDiff - left.setDiff;
@@ -308,6 +354,7 @@ export function calculateGeneralStats(state) {
     rank: index + 1
   }));
 }
+
 
 export function getQualifiedRankLabels(mode) {
   if (mode === 'top1') return [1];
@@ -355,6 +402,51 @@ export function getTournamentDurationSummary(state) {
     matchDuration
   };
 }
+
+
+export function getTournamentTimingState(state, nowTime = new Date().toTimeString().slice(0, 5)) {
+  const duration = getTournamentDurationSummary(state);
+  const completedGroupMatches = (state.groups || []).reduce(
+    (total, group) => total + (group.matches || []).filter((match) => getMatchOutcome(match).finished).length,
+    0
+  );
+  const completedBracketMatches = (state.bracket?.rounds || []).reduce(
+    (total, round) => total + (round.matches || []).filter((match) => getMatchOutcome(match).finished).length,
+    0
+  );
+  const completedMatches = completedGroupMatches + completedBracketMatches;
+  const remainingMatches = Math.max(0, duration.totalMatches - completedMatches);
+  const remainingMinutes = Math.ceil(remainingMatches / Math.max(1, Number(state.settings?.courtCount || 1))) * Number(state.settings?.matchDuration || 20);
+
+  const startTime = state.settings?.startTime || '09:00';
+
+  const toMinutes = (timeValue) => {
+    const [hours = '0', minutes = '0'] = String(timeValue || '00:00').split(':');
+    return (Number(hours) * 60) + Number(minutes);
+  };
+
+  const machineTimeMinutes = toMinutes(nowTime);
+  const startTimeMinutes = toMinutes(startTime);
+
+  // Use the machine time as soon as the planned tournament start has passed,
+  // or as soon as at least one match has been completed. This makes the ETA react
+  // to delays/advance during the day.
+  const shouldUseMachineTime = completedMatches > 0 || machineTimeMinutes >= startTimeMinutes;
+  const baseTime = shouldUseMachineTime ? nowTime : startTime;
+
+  const projectedEndTime = addMinutesToTime(baseTime, shouldUseMachineTime ? remainingMinutes : duration.totalMinutes);
+
+  return {
+    ...duration,
+    completedMatches,
+    remainingMatches,
+    remainingMinutes,
+    projectedEndTime,
+    baseTimeUsed: baseTime,
+    machineTimeUsed: shouldUseMachineTime
+  };
+}
+
 
 export function getChampion(state) {
   const finalRound = state.bracket?.rounds?.[state.bracket.rounds.length - 1];
